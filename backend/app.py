@@ -21,12 +21,13 @@ ALLOWED_VIDEO = {"mp4", "webm", "mov", "avi", "mkv"}
 ALLOWED_MEDIA = ALLOWED_IMAGE | ALLOWED_VIDEO
 
 MAIL_SERVER = os.environ.get("MAIL_SERVER")
-MAIL_PORT = int(os.environ.get("MAIL_PORT", 587))
+MAIL_USE_SSL = os.environ.get("MAIL_USE_SSL", "false").lower() in ("true", "1", "yes")
+MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() not in ("false", "0", "no")
+MAIL_PORT = int(os.environ.get("MAIL_PORT", "465" if MAIL_USE_SSL else "587"))
 MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
 MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
 MAIL_FROM = os.environ.get("MAIL_FROM") or MAIL_USERNAME
 MAIL_TO = os.environ.get("CONTACT_EMAIL") or os.environ.get("MAIL_TO") or "k.saravanan0030@gmail.com"
-MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() not in ("false", "0", "no")
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(os.path.join(FRONTEND_DIR, "assets", "images"), exist_ok=True)
@@ -68,12 +69,18 @@ def send_email(subject, body, reply_to=None):
 
     try:
         context = ssl.create_default_context()
-        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT) as server:
-            if MAIL_USE_TLS:
-                server.starttls(context=context)
-            if MAIL_USERNAME and MAIL_PASSWORD:
-                server.login(MAIL_USERNAME, MAIL_PASSWORD)
-            server.send_message(msg)
+        if MAIL_USE_SSL:
+            with smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT, context=context) as server:
+                if MAIL_USERNAME and MAIL_PASSWORD:
+                    server.login(MAIL_USERNAME, MAIL_PASSWORD)
+                server.send_message(msg)
+        else:
+            with smtplib.SMTP(MAIL_SERVER, MAIL_PORT) as server:
+                if MAIL_USE_TLS:
+                    server.starttls(context=context)
+                if MAIL_USERNAME and MAIL_PASSWORD:
+                    server.login(MAIL_USERNAME, MAIL_PASSWORD)
+                server.send_message(msg)
         return True
     except Exception as err:
         print("Email send failed:", err)
