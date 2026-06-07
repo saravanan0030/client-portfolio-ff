@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Free Fire Pro Player Portfolio — Stats, Achievements, and Contact" />
+  <title>Free Fire Portfolio | Pro Gamer</title>
+  <meta name="author" content="_am__santhosh_">
+  <meta name="keywords" content="Free Fire, Pro Player, Portfolio, Stats, Achievements, Contact">
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow">
+  <meta name="bingbot" content="index, follow">
+  <meta name="yandexbot" content="index, follow">
+  <meta name="sitemap" content="https://freefire-portfolio.com/sitemap.xml">
+  <meta name="google-site-verification" content="google-site-verification=google-site-verification">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ff: {
+              dark: '#06060b',
+              darker: '#030308',
+              orange: '#ff5500',
+              gold: '#ffc800',
+              red: '#ff1744',
+              purple: '#a855f7',
+              cyan: '#00e5ff',
+            }
+          },
+          fontFamily: {
+            orbitron: ['Orbitron', 'sans-serif'],
+            rajdhani: ['Rajdhani', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-ff-dark text-white font-rajdhani overflow-x-hidden">
+
+  <!-- Custom Cursor -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- Scroll Progress -->
+  <div id="scrollProgress"></div>
+
+  <!-- Background Layers -->
+  <div class="mesh-bg">
+    <div class="mesh-orb mesh-orb-1"></div>
+    <div class="mesh-orb mesh-orb-2"></div>
+    <div class="mesh-orb mesh-orb-3"></div>
+  </div>
+  <div class="grid-overlay"></div>
+  <div class="scanlines"></div>
+  <canvas id="particles" class="fixed inset-0 z-[3] pointer-events-none opacity-40"></canvas>
+
+  <!-- Preloader -->
+  <div id="preloader" class="fixed inset-0 z-[9999] flex items-center justify-center">
+    <div class="preloader-inner">
+      <div class="preloader-logo">BOOYAH</div>
+      <p class="font-orbitron text-xs tracking-[0.5em] text-gray-500 mt-2">LOADING ARENA</p>
+      <div class="preloader-bar-wrap"><div class="preloader-bar"></div></div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        <a href="#home" class="flex items-center gap-3 group magnetic">
+          <div class="w-10 h-10 relative flex items-center justify-center font-orbitron font-black text-sm">
+            <div class="absolute inset-0 bg-gradient-to-br from-ff-orange to-ff-red rounded rotate-45 group-hover:rotate-[225deg] transition-transform duration-700"></div>
+            <span class="relative z-10">FF</span>
+          </div>
+          <span class="font-orbitron font-bold text-base hidden sm:block tracking-widest">FREE<span class="text-ff-orange">FIRE</span></span>
+        </a>
+
+        <div class="hidden md:flex items-center gap-10">
+          <a href="#home" class="nav-link" data-text="Home">Home</a>
+          <a href="#about" class="nav-link" data-text="About">About</a>
+          <a href="#stats" class="nav-link" data-text="Stats">Stats</a>
+          <a href="#achievements" class="nav-link" data-text="Achievements">Achievements</a>
+          <a href="#arsenal" class="nav-link" data-text="Arsenal">Arsenal</a>
+          <a href="#gallery" class="nav-link" data-text="Gallery">Gallery</a>
+          <a href="#videos" class="nav-link" data-text="Videos">Videos</a>
+          <a href="#contact" class="nav-link" data-text="Contact">Contact</a>
+        </div>
+
+        <a href="#contact" class="hidden md:inline-flex btn-glow magnetic">Hire Me</a>
+
+        <button id="menuBtn" class="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5" aria-label="Toggle menu">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobileMenu" class="md:hidden hidden bg-ff-darker/95 backdrop-blur-xl border-t border-ff-orange/10">
+      <div class="px-4 py-6 flex flex-col">
+        <a href="#home" class="mobile-nav-link">Home</a>
+        <a href="#about" class="mobile-nav-link">About</a>
+        <a href="#stats" class="mobile-nav-link">Stats</a>
+        <a href="#achievements" class="mobile-nav-link">Achievements</a>
+        <a href="#arsenal" class="mobile-nav-link">Arsenal</a>
+        <a href="#gallery" class="mobile-nav-link">Gallery</a>
+        <a href="#videos" class="mobile-nav-link">Videos</a>
+        <a href="#contact" class="mobile-nav-link">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="home" class="relative min-h-screen flex items-center pt-20 z-10">
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div class="reveal-left">
+          <div class="rank-badge mb-8">
+            <span class="dot"></span>
+            Heroic Rank &bull; Season 43
+          </div>
+
+          <h1 class="font-orbitron text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] mb-4">
+            <span class="block text-outline text-5xl sm:text-6xl lg:text-7xl xl:text-8xl opacity-30 absolute -z-10 translate-x-1 translate-y-1">PRO GAMER</span>
+            PRO <span class="glitch text-gradient" data-text="FREE FIRE">FREE FIRE</span>
+          </h1>
+          <h2 class="font-orbitron text-3xl sm:text-4xl lg:text-5xl font-black text-ff-orange mb-8" id="heroSubtitle">PLAYER</h2>
+
+          <p class="text-gray-400 text-lg max-w-lg mb-10 leading-relaxed border-l-2 border-ff-orange/30 pl-6">
+            Elite competitive gamer with 7+ years of experience. Tournament champion, content creator, and ranked specialist dominating the battlefield.
+          </p>
+
+          <div class="flex flex-wrap gap-4 mb-12">
+            <a href="#stats" class="btn-primary magnetic">
+              <span>View Stats</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </a>
+            <a href="#contact" class="btn-secondary magnetic">Get In Touch</a>
+          </div>
+
+          <div class="flex items-center gap-8">
+            <div class="flex -space-x-2">
+              <div class="w-11 h-11 rounded-full bg-ff-orange/20 border-2 border-ff-dark flex items-center justify-center text-sm animate-float">🏆</div>
+              <div class="w-11 h-11 rounded-full bg-ff-gold/20 border-2 border-ff-dark flex items-center justify-center text-sm animate-float" style="animation-delay:0.5s">🎯</div>
+              <div class="w-11 h-11 rounded-full bg-ff-purple/20 border-2 border-ff-dark flex items-center justify-center text-sm animate-float" style="animation-delay:1s">⚡</div>
+            </div>
+            <div>
+              <p class="font-orbitron text-2xl font-bold text-ff-gold">50+</p>
+              <p class="text-xs text-gray-500 uppercase tracking-widest">Tournament Wins</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative reveal-right">
+          <div class="hud-card mx-auto max-w-sm lg:max-w-md" id="hudCard">
+            <div class="hud-ring"></div>
+            <div class="hud-ring hud-ring-2"></div>
+            <div class="hud-card-inner" id="hudCardInner">
+              <div class="hud-corner hud-corner-tl"></div>
+              <div class="hud-corner hud-corner-tr"></div>
+              <div class="hud-corner hud-corner-bl"></div>
+              <div class="hud-corner hud-corner-br"></div>
+
+              <div class="text-center">
+                <div class="hud-avatar">
+                  <img src="assets/images/profile.svg" alt="Player Profile" class="profile-photo" id="profilePhoto" />
+                </div>
+                <h3 class="font-orbitron text-xl font-bold tracking-wide">ShadowStrike_FF</h3>
+                <p class="text-ff-orange text-sm font-semibold mt-1 mb-6 font-mono">UID: 1234567890</p>
+                <div class="grid grid-cols-3 gap-3">
+                  <div class="stat-mini">
+                    <span class="text-xl font-orbitron font-bold text-ff-gold counter" data-target="4.2">0</span>
+                    <span class="text-[10px] text-gray-500 uppercase tracking-wider mt-1">K/D</span>
+                  </div>
+                  <div class="stat-mini">
+                    <span class="text-xl font-orbitron font-bold text-ff-orange counter" data-target="68" data-suffix="%">0</span>
+                    <span class="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Win</span>
+                  </div>
+                  <div class="stat-mini">
+                    <span class="text-sm font-orbitron font-bold text-ff-cyan">Heroic</span>
+                    <span class="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Rank</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
+      <a href="#about" class="scroll-indicator">
+        <span class="text-[10px] tracking-[0.3em] uppercase">Scroll</span>
+        <div class="scroll-mouse"></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Marquee -->
+  <div class="marquee-wrap relative z-10">
+    <div class="marquee-track">
+      <div class="marquee-item"><span>★</span> BOOYAH MASTER</div>
+      <div class="marquee-item"><span>★</span> HEROIC RANK</div>
+      <div class="marquee-item"><span>★</span> 12,450+ KILLS</div>
+      <div class="marquee-item"><span>★</span> TOURNAMENT CHAMPION</div>
+      <div class="marquee-item"><span>★</span> SNIPER ELITE</div>
+      <div class="marquee-item"><span>★</span> 68% WIN RATE</div>
+      <div class="marquee-item"><span>★</span> BOOYAH MASTER</div>
+      <div class="marquee-item"><span>★</span> HEROIC RANK</div>
+      <div class="marquee-item"><span>★</span> 12,450+ KILLS</div>
+      <div class="marquee-item"><span>★</span> TOURNAMENT CHAMPION</div>
+      <div class="marquee-item"><span>★</span> SNIPER ELITE</div>
+      <div class="marquee-item"><span>★</span> 68% WIN RATE</div>
+    </div>
+  </div>
+
+  <!-- About Section -->
+  <section id="about" class="relative py-28 sm:py-36 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-20 reveal-up">
+        <span class="section-tag">About Me</span>
+        <h2 class="font-orbitron text-3xl sm:text-4xl lg:text-5xl font-black mt-6">Battlefield <span class="text-gradient">Legend</span></h2>
+        <div class="section-divider mt-6"></div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div class="reveal-left">
+          <div class="about-frame">
+            <div class="about-frame-border"></div>
+            <div class="about-frame-inner">
+              <img src="assets/images/profile.svg" alt="About Player" class="about-photo" />
+              <div class="about-photo-overlay"></div>
+            </div>
+            <div class="about-live-tag">
+              <span class="dot w-2 h-2 bg-green-400 rounded-full inline-block" style="animation: blink 1.5s ease infinite"></span>
+              <span class="text-sm">Live on YouTube — Streaming Now</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="reveal-right space-y-6">
+          <p class="text-gray-300 text-lg leading-relaxed">
+            I'm a professional Free Fire player specializing in aggressive ranked gameplay and tournament competition. With over <strong class="text-ff-orange">3,800 matches</strong> and a consistent <strong class="text-ff-gold">68% win rate</strong>, I've built a reputation as one of the top players in my region.
+          </p>
+          <p class="text-gray-500 leading-relaxed">
+            My playstyle combines precision sniping with clutch close-range combat. I create content, coach aspiring players, and compete in regional championships representing my squad.
+          </p>
+
+          <div class="grid sm:grid-cols-2 gap-4 pt-6">
+            <div class="feature-card tilt-card">
+              <div class="feature-icon">🎯</div>
+              <h4 class="font-orbitron font-bold text-sm mb-1">Sniper Specialist</h4>
+              <p class="text-xs text-gray-500">AWM & M82B expert with 85% headshot rate</p>
+            </div>
+            <div class="feature-card tilt-card">
+              <div class="feature-icon">🏆</div>
+              <h4 class="font-orbitron font-bold text-sm mb-1">Tournament Pro</h4>
+              <p class="text-xs text-gray-500">Multiple regional championship titles</p>
+            </div>
+            <div class="feature-card tilt-card">
+              <div class="feature-icon">📺</div>
+              <h4 class="font-orbitron font-bold text-sm mb-1">Content Creator</h4>
+              <p class="text-xs text-gray-500">100K+ subscribers on YouTube</p>
+            </div>
+            <div class="feature-card tilt-card">
+              <div class="feature-icon">👥</div>
+              <h4 class="font-orbitron font-bold text-sm mb-1">Squad Leader</h4>
+              <p class="text-xs text-gray-500">Leading Team Phoenix to victory</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section id="stats" class="relative py-28 sm:py-36 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-20 reveal-up">
+        <span class="section-tag">Performance</span>
+        <h2 class="font-orbitron text-3xl sm:text-4xl lg:text-5xl font-black mt-6">Player <span class="text-gradient">Statistics</span></h2>
+        <div class="section-divider mt-6"></div>
+      </div>
+      <div id="statsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5"></div>
+    </div>
+  </section>
+
+  <!-- Achievements Section -->
+  <section id="achievements" class="relative py-28 sm:py-36 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-20 reveal-up">
+        <span class="section-tag">Hall of Fame</span>
+        <h2 class="font-orbitron text-3xl sm:text-4xl lg:text-5xl font-black mt-6">My <span class="text-gradient">Achievements</span></h2>
+        <div class="section-divider mt-6"></div>
+      </div>
+      <div id="achievementsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </div>
+  </section>
+
+  <!-- Arsenal Section -->
+  <section id="arsenal" class="relative py-28 sm:py-36 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-20 reveal-up">
+        <span class="section-tag">Loadout</span>
+        <h2 class="font-orbitron text-3xl sm:text-4xl lg:text-5xl font-black mt-6">Weapon <span class="text-gradient">Arsenal</span></h2>
+        <p class="text-gray-500 mt-4 max-w-xl mx-auto text-sm">Master of all weapon classes — from long-range sniping to close-quarters domination</p>
+        <div class="section-divider mt-6"></div>
+      </div>
+      <div id="weaponsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5"></div>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section id="gallery" class="relative py-28 sm:py-36 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-20 reveal-up">
+        <span class="section-tag">Screenshots</span>
+        <h2 class="font-orbitron text-3xl sm:text-4xl lg:text-5xl font-black mt-6">Photo <span class="text-gradient">Gallery</span></h2>
+        <p class="text-gray-500 mt-4 max-w-xl mx-auto text-sm">Gameplay moments, tournament wins, and squad highlights</p>
+        <div class="section-divider mt-6"></div>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-3 mb-10 reveal-up" id="galleryFilters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="gameplay">Gameplay</button>
+        <button class="filter-btn" data-filter="tournament">Tournament</button>
+        <button class="filter-btn" data-filter="team">Team</button>
+        <button class="filter-btn" data-filter="sniper">Sniper</button>
+        <button class="filter-btn" data-filter="content">Content</button>
+      </div>
+
+      <div id="galleryGrid" class="gallery-grid"></div>
+
+      <!-- Upload Photo -->
+      <div class="upload-panel reveal-up mt-12">
+        <h3 class="font-orbitron font-bold text-sm uppercase tracking-wider text-ff-orange mb-4">📷 Attach Your Photo</h3>
+        <form id="photoUploadForm" class="upload-form" enctype="multipart/form-data">
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="form-group">
+              <label for="photoTitle">Title</label>
+              <input type="text" id="photoTitle" name="title" placeholder="Photo title" />
+            </div>
+            <div class="form-group">
+              <label for="photoCategory">Category</label>
+              <select id="photoCategory" name="category" class="form-select">
+                <option value="gameplay">Gameplay</option>
+                <option value="tournament">Tournament</option>
+                <option value="team">Team</option>
+                <option value="sniper">Sniper</option>
+                <option value="content">Content</option>
+              </select>
+            </div>
+            <div class="form-group sm:col-span-2">
+              <label for="photoFile">Image File</label>
+              <div class="file-drop" id="photoDrop">
+                <input type="file" id="photoFile" name="file" accept="image/*" required />
+                <span class="file-drop-text">Drop image here or click to browse</span>
+                <span class="file-drop-name" id="photoFileName"></span>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn-glow mt-4">Upload Photo</button>
+          <div id="photoUploadStatus" class="hidden text-sm mt-3 font-semibold"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Videos Section -->
+  <section id="videos" class="relative py-28 sm:py-36 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-20 reveal-up">
+        <span class="section-tag">Highlights</span>
+        <h2 class="font-orbitron text-3xl sm:text-4xl lg:text-5xl font-black mt-6">Video <span class="text-gradient">Showcase</span></h2>
+        <p class="text-gray-500 mt-4 max-w-xl mx-auto text-sm">Montages, clutch plays, and tournament replays</p>
+        <div class="section-divider mt-6"></div>
+      </div>
+
+      <div id="videosGrid" class="videos-grid"></div>
+
+      <!-- Featured Video Player -->
+      <div class="featured-video reveal-up mt-12" id="featuredVideo">
+        <div class="featured-video-header">
+          <span class="font-orbitron text-xs tracking-widest text-ff-orange uppercase">Now Playing</span>
+          <h3 class="font-orbitron font-bold text-lg mt-1" id="featuredVideoTitle">Select a video</h3>
+        </div>
+        <div class="video-player-wrap" id="videoPlayerWrap">
+          <div class="video-placeholder">
+            <div class="play-icon-lg">▶</div>
+            <p class="text-gray-500 text-sm mt-4">Click any video below to play</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload Video -->
+      <div class="upload-panel reveal-up mt-12">
+        <h3 class="font-orbitron font-bold text-sm uppercase tracking-wider text-ff-orange mb-4">🎬 Attach Your Video</h3>
+        <form id="videoUploadForm" class="upload-form" enctype="multipart/form-data">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="form-group">
+              <label for="videoTitle">Title</label>
+              <input type="text" id="videoTitle" name="title" placeholder="Video title" />
+            </div>
+            <div class="form-group">
+              <label for="videoCategory">Category</label>
+              <select id="videoCategory" name="category" class="form-select">
+                <option value="highlight">Highlight</option>
+                <option value="montage">Montage</option>
+                <option value="tournament">Tournament</option>
+                <option value="clutch">Clutch</option>
+              </select>
+            </div>
+            <div class="form-group sm:col-span-2">
+              <label for="videoUrl">YouTube / Embed URL (optional)</label>
+              <input type="url" id="videoUrl" name="video_url" placeholder="https://www.youtube.com/embed/..." />
+            </div>
+            <div class="form-group">
+              <label for="videoFile">Video File (mp4, webm)</label>
+              <div class="file-drop" id="videoDrop">
+                <input type="file" id="videoFile" name="file" accept="video/*" />
+                <span class="file-drop-text">Drop video or click to browse</span>
+                <span class="file-drop-name" id="videoFileName"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="videoThumb">Thumbnail (optional)</label>
+              <div class="file-drop" id="thumbDrop">
+                <input type="file" id="videoThumb" name="thumbnail" accept="image/*" />
+                <span class="file-drop-text">Drop thumbnail image</span>
+                <span class="file-drop-name" id="thumbFileName"></span>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn-glow mt-4">Upload Video</button>
+          <div id="videoUploadStatus" class="hidden text-sm mt-3 font-semibold"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox" class="lightbox hidden">
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+    <button class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Previous">&#8249;</button>
+    <button class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Next">&#8250;</button>
+    <div class="lightbox-content">
+      <img id="lightboxImg" src="" alt="" />
+      <div class="lightbox-info">
+        <h3 id="lightboxTitle" class="font-orbitron font-bold text-lg"></h3>
+        <p id="lightboxDesc" class="text-gray-400 text-sm mt-1"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Section -->
+  <section id="contact" class="relative py-28 sm:py-36 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-20 reveal-up">
+        <span class="section-tag">Get In Touch</span>
+        <h2 class="font-orbitron text-3xl sm:text-4xl lg:text-5xl font-black mt-6">Contact <span class="text-gradient">Me</span></h2>
+        <p class="text-gray-500 mt-4 max-w-xl mx-auto text-sm">Looking for a pro player for your squad, sponsorship, or coaching? Reach out!</p>
+        <div class="section-divider mt-6"></div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-12">
+        <div class="reveal-left space-y-4">
+          <div class="contact-info-card">
+            <div class="icon-box">🌐</div>
+            <div>
+              <h4 class="font-orbitron font-bold text-sm uppercase tracking-wider">Website</h4>
+              <a href="https://freefire-portfolio.com" target="_blank" rel="noopener" class="text-ff-orange hover:text-ff-gold transition-colors text-sm">www.freefire-portfolio.com</a>
+            </div>
+          </div>
+          <div class="contact-info-card">
+            <div class="icon-box">📧</div>
+            <div>
+              <h4 class="font-orbitron font-bold text-sm uppercase tracking-wider">Email</h4>
+              <a href="mailto:shadowstrike@freefire.gg" class="text-gray-400 hover:text-ff-orange transition-colors text-sm">shadowstrike@freefire.gg</a>
+            </div>
+          </div>
+          <div class="contact-info-card">
+            <div class="icon-box">📱</div>
+            <div>
+              <h4 class="font-orbitron font-bold text-sm uppercase tracking-wider">Discord</h4>
+              <p class="text-gray-400 text-sm font-mono">ShadowStrike#FF42</p>
+            </div>
+          </div>
+          <div class="contact-info-card">
+            <div class="icon-box">🎮</div>
+            <div>
+              <h4 class="font-orbitron font-bold text-sm uppercase tracking-wider">In-Game UID</h4>
+              <p class="text-gray-400 text-sm font-mono">1234567890</p>
+            </div>
+          </div>
+          <div class="flex gap-3 pt-4">
+            <a href="https://youtube.com" target="_blank" rel="noopener" class="social-btn" aria-label="YouTube">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener" class="social-btn" aria-label="Instagram">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener" class="social-btn" aria-label="Twitter">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://twitch.tv" target="_blank" rel="noopener" class="social-btn" aria-label="Twitch">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="reveal-right">
+          <form id="contactForm" class="contact-form space-y-5">
+            <div class="grid sm:grid-cols-2 gap-5">
+              <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" name="name" required placeholder="Enter your name" />
+              </div>
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="you@email.com" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="subject">Subject</label>
+              <input type="text" id="subject" name="subject" placeholder="Sponsorship / Squad Invite / Coaching" />
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" rows="5" required placeholder="Tell me about your proposal..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="attachment">Attach Photo / Video (optional)</label>
+              <div class="file-drop" id="contactDrop">
+                <input type="file" id="attachment" name="attachment" accept="image/*,video/*" />
+                <span class="file-drop-text">Attach image or video file</span>
+                <span class="file-drop-name" id="attachmentFileName"></span>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary w-full justify-center magnetic" id="submitBtn">
+              <span>Send Message</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+            </button>
+            <div id="formStatus" class="hidden text-center py-3 rounded text-sm font-semibold"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-gradient-to-br from-ff-orange to-ff-red rounded flex items-center justify-center font-orbitron font-black text-[10px]">FF</div>
+          <span class="font-orbitron text-xs tracking-widest">FREE<span class="text-ff-orange">FIRE</span> PORTFOLIO</span>
+        </div>
+        <p class="text-gray-600 text-xs">&copy; 2026 ShadowStrike_FF. All rights reserved.</p>
+        <a href="https://freefire-portfolio.com" target="_blank" rel="noopener" class="text-ff-orange text-xs hover:text-ff-gold transition-colors tracking-wider">freefire-portfolio.com</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
