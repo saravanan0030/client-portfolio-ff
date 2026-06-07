@@ -597,10 +597,10 @@ async function loadVideos() {
 
 function getFallbackVideos() {
   return [
-    { id: 'fallback-video-0', title: 'Booyah Highlights', description: 'Best Booyah moments', video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', thumbnail: 'assets/images/video-thumb-1.svg', category: 'highlight' },
-    { id: 'fallback-video-1', title: 'AWM Montage', description: 'Sniper montage', video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', thumbnail: 'assets/images/video-thumb-2.svg', category: 'montage' },
-    { id: 'fallback-video-2', title: 'Tournament Finals', description: 'Final match replay', video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', thumbnail: 'assets/images/video-thumb-3.svg', category: 'tournament' },
-    { id: 'fallback-video-3', title: 'Clutch King', description: '1v4 clutch plays', video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', thumbnail: 'assets/images/video-thumb-4.svg', category: 'clutch' },
+    { id: 'fallback-video-0', title: 'Booyah Highlights', description: 'Free Fire best moments', video_url: 'https://www.youtube.com/watch?v=1Hs3X3x4zUg', thumbnail: 'assets/images/video-thumb-1.svg', category: 'highlight' },
+    { id: 'fallback-video-1', title: 'AWM Montage', description: 'Free Fire sniper montage', video_url: 'https://www.youtube.com/watch?v=Qw4xM5FZ2WQ', thumbnail: 'assets/images/video-thumb-2.svg', category: 'montage' },
+    { id: 'fallback-video-2', title: 'Tournament Finals', description: 'Free Fire final match replay', video_url: 'https://www.youtube.com/watch?v=8k9ZG3bF14E', thumbnail: 'assets/images/video-thumb-3.svg', category: 'tournament' },
+    { id: 'fallback-video-3', title: 'Clutch King', description: 'Free Fire 1v4 clutch plays', video_url: 'https://www.youtube.com/watch?v=5t7M2K1L8PQ', thumbnail: 'assets/images/video-thumb-4.svg', category: 'clutch' },
   ];
 }
 
@@ -889,7 +889,8 @@ function initContactForm() {
 
       if (res.ok) {
         status.classList.add('bg-green-500/20', 'text-green-400');
-        status.textContent = result.message || 'Message sent successfully!';
+        const senderEmail = form.email.value.trim();
+        status.textContent = result.message || `Message sent successfully from ${senderEmail}!`;
         form.reset();
         document.getElementById('attachmentFileName').textContent = '';
       } else {
@@ -899,7 +900,8 @@ function initContactForm() {
     } catch {
       status.classList.remove('hidden');
       status.classList.add('bg-green-500/20', 'text-green-400');
-      status.textContent = 'Message received! We will get back to you soon.';
+      const senderEmail = form.email.value.trim();
+      status.textContent = senderEmail ? `Message received from ${senderEmail}! We will get back to you soon.` : 'Message received! We will get back to you soon.';
       form.reset();
     }
 

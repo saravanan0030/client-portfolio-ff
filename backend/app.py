@@ -25,7 +25,7 @@ MAIL_PORT = int(os.environ.get("MAIL_PORT", 587))
 MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
 MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
 MAIL_FROM = os.environ.get("MAIL_FROM") or MAIL_USERNAME
-MAIL_TO = os.environ.get("CONTACT_EMAIL") or os.environ.get("MAIL_TO")
+MAIL_TO = os.environ.get("CONTACT_EMAIL") or os.environ.get("MAIL_TO") or "k.saravanan0030@gmil.com"
 MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() not in ("false", "0", "no")
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
