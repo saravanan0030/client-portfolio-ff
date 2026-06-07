@@ -5,6 +5,9 @@ from werkzeug.utils import secure_filename
 import sqlite3
 import os
 import uuid
+import smtplib
+import ssl
+from email.message import EmailMessage
 
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -16,6 +19,14 @@ UPLOAD_DIR = os.path.join(FRONTEND_DIR, "assets", "uploads")
 ALLOWED_IMAGE = {"png", "jpg", "jpeg", "gif", "webp", "svg"}
 ALLOWED_VIDEO = {"mp4", "webm", "mov", "avi", "mkv"}
 ALLOWED_MEDIA = ALLOWED_IMAGE | ALLOWED_VIDEO
+
+MAIL_SERVER = os.environ.get("MAIL_SERVER")
+MAIL_PORT = int(os.environ.get("MAIL_PORT", 587))
+MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
+MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
+MAIL_FROM = os.environ.get("MAIL_FROM") or MAIL_USERNAME
+MAIL_TO = os.environ.get("CONTACT_EMAIL") or os.environ.get("MAIL_TO")
+MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() not in ("false", "0", "no")
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(os.path.join(FRONTEND_DIR, "assets", "images"), exist_ok=True)
@@ -41,6 +52,32 @@ def is_deletable_upload(file_path):
 def path_from_url(file_path):
     rel = file_path.lstrip("/").replace("/", os.sep)
     return os.path.join(FRONTEND_DIR, rel)
+
+
+def send_email(subject, body, reply_to=None):
+    if not MAIL_SERVER or not MAIL_TO:
+        return False
+
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = MAIL_FROM or MAIL_TO
+    msg["To"] = MAIL_TO
+    if reply_to:
+        msg["Reply-To"] = reply_to
+    msg.set_content(body)
+
+    try:
+        context = ssl.create_default_context()
+        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT) as server:
+            if MAIL_USE_TLS:
+                server.starttls(context=context)
+            if MAIL_USERNAME and MAIL_PASSWORD:
+                server.login(MAIL_USERNAME, MAIL_PASSWORD)
+            server.send_message(msg)
+        return True
+    except Exception as err:
+        print("Email send failed:", err)
+        return False
 
 
 def safe_delete_file(file_path):
@@ -364,6 +401,7 @@ def submit_contact():
         email = request.form.get("email", "").strip()
         subject = request.form.get("subject", "").strip()
         message = request.form.get("message", "").strip()
+        access_code = request.form.get("access_code", "").strip()
         attachment_path = None
 
         file = request.files.get("attachment")
@@ -377,6 +415,8 @@ def submit_contact():
         full_message = message
         if attachment_path:
             full_message += f"\n\n[Attached file: {attachment_path}]"
+        if access_code:
+            full_message += f"\n\nAccess Code: {access_code}"
 
         conn = get_db()
         conn.execute(
@@ -385,25 +425,47 @@ def submit_contact():
         )
         conn.commit()
         conn.close()
+
+        if MAIL_SERVER and MAIL_TO:
+            email_subject = f"New contact from {name}"
+            email_body = f"Name: {name}\nEmail: {email}\nSubject: {subject}\nAccess Code: {access_code}\n\n{full_message}"
+            send_email(email_subject, email_body, reply_to=email)
+
         return jsonify({"success": True, "message": "Message sent with attachment! We'll get back to you soon."})
 
     data = request.get_json()
     if not data or not data.get("name") or not data.get("email") or not data.get("message"):
         return jsonify({"error": "Name, email, and message are required"}), 400
 
+    name = data["name"].strip()
+    email = data["email"].strip()
+    subject = data.get("subject", "").strip()
+    access_code = data.get("access_code", "").strip()
+    message = data["message"].strip()
+
+    final_message = message
+    if access_code:
+        final_message += f"\n\nAccess Code: {access_code}"
+
     conn = get_db()
     conn.execute(
         "INSERT INTO contacts (name, email, subject, message, created_at) VALUES (?, ?, ?, ?, ?)",
         (
-            data["name"],
-            data["email"],
-            data.get("subject", ""),
-            data["message"],
+            name,
+            email,
+            subject,
+            final_message,
             datetime.utcnow().isoformat(),
         ),
     )
     conn.commit()
     conn.close()
+
+    if MAIL_SERVER and MAIL_TO:
+        email_subject = f"New contact from {name}"
+        email_body = f"Name: {name}\nEmail: {email}\nSubject: {subject}\nAccess Code: {access_code}\n\n{final_message}"
+        send_email(email_subject, email_body, reply_to=email)
+
     return jsonify({"success": True, "message": "Message sent successfully! We'll get back to you soon."})
 
 
