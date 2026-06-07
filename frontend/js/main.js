@@ -1,5 +1,14 @@
-const API_BASE = window.APP_CONFIG?.apiBase || window.location.origin;
-const UPLOAD_BASE = window.APP_CONFIG?.uploadBase || window.location.origin;
+const localApiFallback = 'http://127.0.0.1:5000';
+const config = window.APP_CONFIG || {};
+const isLocalPage = window.location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const API_BASE = config.apiBase || (isLocalPage ? localApiFallback : window.location.origin);
+const UPLOAD_BASE = config.uploadBase || API_BASE;
+
+if (!config.apiBase && !isLocalPage) {
+  console.warn('No backend API configured in config.js. Uploads may fail unless the frontend and backend share the same origin or BACKEND_URL is set.');
+}
+
+console.info('Frontend config:', { apiBase: API_BASE, uploadBase: UPLOAD_BASE, locationOrigin: window.location.origin, locationHref: window.location.href });
 
 function mediaUrl(path) {
   if (!path) return path;
@@ -771,7 +780,13 @@ function initPhotoUpload() {
 
     try {
       const res = await fetch(`${API_BASE}/api/upload/photo`, { method: 'POST', body: formData });
-      const result = await res.json();
+      let result = null;
+      try {
+        result = await res.json();
+      } catch (parseErr) {
+        console.warn('Photo upload response parse failed:', parseErr);
+      }
+
       if (res.ok) {
         status.classList.add('upload-success');
         status.textContent = 'Photo uploaded successfully!';
@@ -780,7 +795,11 @@ function initPhotoUpload() {
         await loadGallery();
       } else {
         status.classList.add('upload-error');
-        status.textContent = result.error || `Upload failed (${res.status} ${res.statusText}).`;
+        status.textContent = result?.error || result?.message || `Upload failed (${res.status} ${res.statusText}).`;
+        if (!result) {
+          const raw = await res.text();
+          console.error('Photo upload failed response:', res.status, res.statusText, raw);
+        }
       }
     } catch (err) {
       console.error('Photo upload error:', err);
@@ -815,7 +834,13 @@ function initVideoUpload() {
 
     try {
       const res = await fetch(`${API_BASE}/api/upload/video`, { method: 'POST', body: formData });
-      const result = await res.json();
+      let result = null;
+      try {
+        result = await res.json();
+      } catch (parseErr) {
+        console.warn('Video upload response parse failed:', parseErr);
+      }
+
       if (res.ok) {
         status.classList.add('upload-success');
         status.textContent = 'Video uploaded successfully!';
@@ -825,7 +850,11 @@ function initVideoUpload() {
         await loadVideos();
       } else {
         status.classList.add('upload-error');
-        status.textContent = result.error || `Upload failed (${res.status} ${res.statusText}).`;
+        status.textContent = result?.error || result?.message || `Upload failed (${res.status} ${res.statusText}).`;
+        if (!result) {
+          const raw = await res.text();
+          console.error('Video upload failed response:', res.status, res.statusText, raw);
+        }
       }
     } catch (err) {
       console.error('Video upload error:', err);
