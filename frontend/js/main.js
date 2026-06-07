@@ -804,7 +804,7 @@ function initPhotoUpload() {
     } catch (err) {
       console.error('Photo upload error:', err);
       status.classList.add('upload-error');
-      status.textContent = `Upload failed. ${err.message || 'Check server connection.'}`;
+      status.textContent = `Upload failed to ${API_BASE}. ${err.message || 'Check server connection.'}`;
     }
     setTimeout(() => status.classList.add('hidden'), 4000);
   });
@@ -859,7 +859,7 @@ function initVideoUpload() {
     } catch (err) {
       console.error('Video upload error:', err);
       status.classList.add('upload-error');
-      status.textContent = `Upload failed. ${err.message || 'Check server connection.'}`;
+      status.textContent = `Upload failed to ${API_BASE}. ${err.message || 'Check server connection.'}`;
     }
     setTimeout(() => status.classList.add('hidden'), 4000);
   });
