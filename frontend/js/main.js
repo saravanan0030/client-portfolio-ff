@@ -14,6 +14,7 @@ function mediaUrl(path) {
 const ICONS = {
   skull: '💀', trophy: '🏆', crosshair: '🎯', star: '⭐', gamepad: '🎮', chart: '📊',
 };
+const DELETE_PASSWORD = '123456';
 const WEAPON_ICONS = {
   awm: '🔭', m1014: '💥', groza: '🔫', mp40: '⚡', deagle: '🎯', m249: '🔥',
 };
@@ -501,7 +502,7 @@ function renderGallery(filter) {
     : galleryPhotos.filter(p => p.category === filter);
 
   grid.innerHTML = filtered.map((p, i) => `
-    <div class="gallery-item stagger-item" data-category="${p.category}" data-index="${galleryPhotos.indexOf(p)}" data-id="${p.id || ''}" style="transition-delay:${i * 60}ms">
+    <div class="gallery-item stagger-item" data-category="${p.category}" data-index="${galleryPhotos.indexOf(p)}" style="transition-delay:${i * 60}ms">
       <img src="${mediaUrl(p.file_path)}" alt="${p.title}" loading="lazy" />
       <div class="gallery-zoom">🔍</div>
       ${p.id ? `<button type="button" class="media-delete-btn" data-id="${p.id}" title="Delete photo" aria-label="Delete photo">✕</button>` : ''}
@@ -660,6 +661,12 @@ function playVideo(index) {
 
 /* ===== Delete Media ===== */
 async function deletePhoto(id) {
+  const password = prompt('Enter the 6-digit delete password for photos:');
+  if (!password) return;
+  if (password.trim() !== DELETE_PASSWORD) {
+    alert('Incorrect delete password.');
+    return;
+  }
   if (!confirm('Delete this photo? This cannot be undone.')) return;
 
   try {
@@ -677,6 +684,12 @@ async function deletePhoto(id) {
 }
 
 async function deleteVideo(id) {
+  const password = prompt('Enter the 6-digit delete password for videos:');
+  if (!password) return;
+  if (password.trim() !== DELETE_PASSWORD) {
+    alert('Incorrect delete password.');
+    return;
+  }
   if (!confirm('Delete this video? This cannot be undone.')) return;
 
   try {
@@ -813,6 +826,16 @@ function initContactForm() {
 
     const attachment = document.getElementById('attachment');
     const hasFile = attachment?.files?.length > 0;
+    const accessCode = form.access_code.value.trim();
+
+    if (!/^[0-9]{6}$/.test(accessCode)) {
+      status.classList.remove('hidden', 'bg-red-500/20', 'text-red-400', 'bg-green-500/20', 'text-green-400');
+      status.classList.add('bg-red-500/20', 'text-red-400');
+      status.textContent = 'Please enter a valid 6-digit access code.';
+      btn.disabled = false;
+      btn.querySelector('span').textContent = 'Send Message';
+      return;
+    }
 
     try {
       let res, result;
@@ -821,6 +844,7 @@ function initContactForm() {
         const formData = new FormData();
         formData.append('name', form.name.value.trim());
         formData.append('email', form.email.value.trim());
+        formData.append('access_code', accessCode);
         formData.append('subject', form.subject.value.trim());
         formData.append('message', form.message.value.trim());
         formData.append('attachment', attachment.files[0]);
@@ -832,6 +856,7 @@ function initContactForm() {
           body: JSON.stringify({
             name: form.name.value.trim(),
             email: form.email.value.trim(),
+            access_code: accessCode,
             subject: form.subject.value.trim(),
             message: form.message.value.trim(),
           }),
