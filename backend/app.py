@@ -12,8 +12,22 @@ from email.message import EmailMessage
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "portfolio.db")
 BASE_DIR = os.path.dirname(__file__)
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+
+if os.path.isfile(ENV_PATH):
+    with open(ENV_PATH, "r", encoding="utf-8") as env_file:
+        for line in env_file:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+DB_PATH = os.path.join(BASE_DIR, "portfolio.db")
 FRONTEND_DIR = os.path.join(BASE_DIR, "..", "frontend")
 UPLOAD_DIR = os.path.join(FRONTEND_DIR, "assets", "uploads")
 ALLOWED_IMAGE = {"png", "jpg", "jpeg", "gif", "webp", "svg"}
@@ -26,8 +40,10 @@ MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() not in ("false", "
 MAIL_PORT = int(os.environ.get("MAIL_PORT", "465" if MAIL_USE_SSL else "587"))
 MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
 MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
-MAIL_FROM = os.environ.get("MAIL_FROM") or MAIL_USERNAME
+MAIL_FROM = os.environ.get("MAIL_FROM") or MAIL_USERNAME or os.environ.get("MAIL_TO")
 MAIL_TO = os.environ.get("CONTACT_EMAIL") or os.environ.get("MAIL_TO") or "k.saravanan0030@gmail.com"
+
+print(f"Email config: server={MAIL_SERVER}, port={MAIL_PORT}, use_ssl={MAIL_USE_SSL}, use_tls={MAIL_USE_TLS}, from={MAIL_FROM}, to={MAIL_TO}")
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(os.path.join(FRONTEND_DIR, "assets", "images"), exist_ok=True)
@@ -71,13 +87,16 @@ def send_email(subject, body, reply_to=None):
         context = ssl.create_default_context()
         if MAIL_USE_SSL:
             with smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT, context=context) as server:
+                server.ehlo()
                 if MAIL_USERNAME and MAIL_PASSWORD:
                     server.login(MAIL_USERNAME, MAIL_PASSWORD)
                 server.send_message(msg)
         else:
             with smtplib.SMTP(MAIL_SERVER, MAIL_PORT) as server:
+                server.ehlo()
                 if MAIL_USE_TLS:
                     server.starttls(context=context)
+                    server.ehlo()
                 if MAIL_USERNAME and MAIL_PASSWORD:
                     server.login(MAIL_USERNAME, MAIL_PASSWORD)
                 server.send_message(msg)
