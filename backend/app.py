@@ -44,6 +44,8 @@ MAIL_FROM = os.environ.get("MAIL_FROM") or MAIL_USERNAME or os.environ.get("MAIL
 MAIL_TO = os.environ.get("CONTACT_EMAIL") or os.environ.get("MAIL_TO") or "k.saravanan0030@gmail.com"
 
 print(f"Email config: server={MAIL_SERVER}, port={MAIL_PORT}, use_ssl={MAIL_USE_SSL}, use_tls={MAIL_USE_TLS}, from={MAIL_FROM}, to={MAIL_TO}")
+if not MAIL_SERVER:
+    print("WARNING: SMTP not configured. Contact form emails will not be sent until MAIL_SERVER is set.")
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(os.path.join(FRONTEND_DIR, "assets", "images"), exist_ok=True)
