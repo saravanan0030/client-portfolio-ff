@@ -25,7 +25,7 @@ MAIL_PORT = int(os.environ.get("MAIL_PORT", 587))
 MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
 MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
 MAIL_FROM = os.environ.get("MAIL_FROM") or MAIL_USERNAME
-MAIL_TO = os.environ.get("CONTACT_EMAIL") or os.environ.get("MAIL_TO") or "k.saravanan0030@gmil.com"
+MAIL_TO = os.environ.get("CONTACT_EMAIL") or os.environ.get("MAIL_TO") or "k.saravanan0030@gmail.com"
 MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() not in ("false", "0", "no")
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -426,10 +426,16 @@ def submit_contact():
         conn.commit()
         conn.close()
 
+        email_sent = False
         if MAIL_SERVER and MAIL_TO:
             email_subject = f"New contact from {name}"
-            email_body = f"Name: {name}\nEmail: {email}\nSubject: {subject}\nAccess Code: {access_code}\n\n{full_message}"
-            send_email(email_subject, email_body, reply_to=email)
+            email_body = f"Name: {name}\nEmail: {email}\nSubject: {subject}\n\n{full_message}"
+            email_sent = send_email(email_subject, email_body, reply_to=email)
+        else:
+            print("Email delivery not configured: set MAIL_SERVER and CONTACT_EMAIL or MAIL_TO.")
+
+        if not email_sent:
+            return jsonify({"success": False, "error": "Message saved but email delivery failed. Check SMTP settings or recipient address."}), 500
 
         return jsonify({"success": True, "message": "Message sent with attachment! We'll get back to you soon."})
 
@@ -461,10 +467,16 @@ def submit_contact():
     conn.commit()
     conn.close()
 
+    email_sent = False
     if MAIL_SERVER and MAIL_TO:
         email_subject = f"New contact from {name}"
-        email_body = f"Name: {name}\nEmail: {email}\nSubject: {subject}\nAccess Code: {access_code}\n\n{final_message}"
-        send_email(email_subject, email_body, reply_to=email)
+        email_body = f"Name: {name}\nEmail: {email}\nSubject: {subject}\n\n{final_message}"
+        email_sent = send_email(email_subject, email_body, reply_to=email)
+    else:
+        print("Email delivery not configured: set MAIL_SERVER and CONTACT_EMAIL or MAIL_TO.")
+
+    if not email_sent:
+        return jsonify({"success": False, "error": "Message saved but email delivery failed. Check SMTP settings or recipient address."}), 500
 
     return jsonify({"success": True, "message": "Message sent successfully! We'll get back to you soon."})
 

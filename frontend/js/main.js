@@ -847,16 +847,6 @@ function initContactForm() {
 
     const attachment = document.getElementById('attachment');
     const hasFile = attachment?.files?.length > 0;
-    const accessCode = form.access_code.value.trim();
-
-    if (!/^[0-9]{6}$/.test(accessCode)) {
-      status.classList.remove('hidden', 'bg-red-500/20', 'text-red-400', 'bg-green-500/20', 'text-green-400');
-      status.classList.add('bg-red-500/20', 'text-red-400');
-      status.textContent = 'Please enter a valid 6-digit access code.';
-      btn.disabled = false;
-      btn.querySelector('span').textContent = 'Send Message';
-      return;
-    }
 
     try {
       let res, result;
@@ -865,7 +855,6 @@ function initContactForm() {
         const formData = new FormData();
         formData.append('name', form.name.value.trim());
         formData.append('email', form.email.value.trim());
-        formData.append('access_code', accessCode);
         formData.append('subject', form.subject.value.trim());
         formData.append('message', form.message.value.trim());
         formData.append('attachment', attachment.files[0]);
@@ -877,7 +866,6 @@ function initContactForm() {
           body: JSON.stringify({
             name: form.name.value.trim(),
             email: form.email.value.trim(),
-            access_code: accessCode,
             subject: form.subject.value.trim(),
             message: form.message.value.trim(),
           }),
