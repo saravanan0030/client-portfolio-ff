@@ -780,11 +780,12 @@ function initPhotoUpload() {
         await loadGallery();
       } else {
         status.classList.add('upload-error');
-        status.textContent = result.error || 'Upload failed.';
+        status.textContent = result.error || `Upload failed (${res.status} ${res.statusText}).`;
       }
-    } catch {
+    } catch (err) {
+      console.error('Photo upload error:', err);
       status.classList.add('upload-error');
-      status.textContent = 'Upload failed. Check server connection.';
+      status.textContent = `Upload failed. ${err.message || 'Check server connection.'}`;
     }
     setTimeout(() => status.classList.add('hidden'), 4000);
   });
@@ -824,11 +825,12 @@ function initVideoUpload() {
         await loadVideos();
       } else {
         status.classList.add('upload-error');
-        status.textContent = result.error || 'Upload failed.';
+        status.textContent = result.error || `Upload failed (${res.status} ${res.statusText}).`;
       }
-    } catch {
+    } catch (err) {
+      console.error('Video upload error:', err);
       status.classList.add('upload-error');
-      status.textContent = 'Upload failed. Check server connection.';
+      status.textContent = `Upload failed. ${err.message || 'Check server connection.'}`;
     }
     setTimeout(() => status.classList.add('hidden'), 4000);
   });
