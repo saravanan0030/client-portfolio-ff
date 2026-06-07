@@ -839,6 +839,10 @@ function initContactForm() {
   const form = document.getElementById('contactForm');
   const status = document.getElementById('formStatus');
   const btn = document.getElementById('submitBtn');
+  if (!form || !status || !btn) {
+    console.warn('Contact form initialization skipped: missing form or button elements.');
+    return;
+  }
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
@@ -885,12 +889,11 @@ function initContactForm() {
         status.classList.add('bg-red-500/20', 'text-red-400');
         status.textContent = result.error || 'Something went wrong.';
       }
-    } catch {
+    } catch (error) {
+      console.error('Contact submit failed:', error);
       status.classList.remove('hidden');
-      status.classList.add('bg-green-500/20', 'text-green-400');
-      const senderEmail = form.email.value.trim();
-      status.textContent = senderEmail ? `Message received from ${senderEmail}! We will get back to you soon.` : 'Message received! We will get back to you soon.';
-      form.reset();
+      status.classList.add('bg-red-500/20', 'text-red-400');
+      status.textContent = 'Failed to send your message. Please check your connection and try again.';
     }
 
     btn.disabled = false;
