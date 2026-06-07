@@ -501,18 +501,21 @@ function renderGallery(filter) {
     ? galleryPhotos
     : galleryPhotos.filter(p => p.category === filter);
 
-  grid.innerHTML = filtered.map((p, i) => `
+  grid.innerHTML = filtered.map((p, i) => {
+    const itemId = p.id || `fallback-photo-${i}`;
+    return `
     <div class="gallery-item stagger-item" data-category="${p.category}" data-index="${galleryPhotos.indexOf(p)}" style="transition-delay:${i * 60}ms">
       <img src="${mediaUrl(p.file_path)}" alt="${p.title}" loading="lazy" />
       <div class="gallery-zoom">🔍</div>
-      <button type="button" class="media-delete-btn" data-id="${p.id}" title="Delete photo" aria-label="Delete photo">✕</button>
+      <button type="button" class="media-delete-btn" data-id="${itemId}" title="Delete photo" aria-label="Delete photo">✕</button>
       <div class="gallery-overlay">
         <span class="gallery-cat">${p.category}</span>
         <h4 class="font-orbitron font-bold text-sm">${p.title}</h4>
         <p class="text-xs text-gray-400 mt-1">${p.description || ''}</p>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   grid.querySelectorAll('.gallery-item').forEach(item => {
     item.addEventListener('click', () => openLightbox(parseInt(item.dataset.index)));
@@ -603,12 +606,13 @@ function getFallbackVideos() {
 
 function renderVideoCard(v, i) {
   const thumb = v.thumbnail || 'assets/images/video-thumb-1.svg';
+  const itemId = v.id || `fallback-video-${i}`;
   return `
-    <div class="video-card stagger-item" data-index="${i}" data-id="${v.id || ''}" style="transition-delay:${i * 80}ms">
+    <div class="video-card stagger-item" data-index="${i}" data-id="${itemId}" style="transition-delay:${i * 80}ms">
       <div class="video-thumb">
         <img src="${mediaUrl(thumb)}" alt="${v.title}" loading="lazy" />
         <div class="video-play-btn">▶</div>
-        ${v.id ? `<button type="button" class="media-delete-btn" data-id="${v.id}" title="Delete video" aria-label="Delete video">✕</button>` : ''}
+        <button type="button" class="media-delete-btn" data-id="${itemId}" title="Delete video" aria-label="Delete video">✕</button>
         <span class="video-duration">${v.category || 'video'}</span>
       </div>
       <div class="video-info">
