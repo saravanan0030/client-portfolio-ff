@@ -1,0 +1,9 @@
+backend/portfolio.db
+backend/__pycache__/
+frontend/assets/uploads/*
+!frontend/assets/uploads/.gitkeep
+frontend/_redirects
+frontend/config.js
+node_modules/
+.env
+.netlify/

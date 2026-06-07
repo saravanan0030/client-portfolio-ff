@@ -1,0 +1,17 @@
+# Deploy backend API on Render (free tier)
+# After deploy, copy the service URL into Netlify BACKEND_URL env var.
+
+services:
+  - type: web
+    name: freefire-portfolio-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    healthCheckPath: /api/stats
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.11"
+      - key: FLASK_DEBUG
+        value: "false"

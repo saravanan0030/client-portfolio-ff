@@ -7,7 +7,7 @@ import os
 import uuid
 
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "portfolio.db")
 BASE_DIR = os.path.dirname(__file__)
@@ -32,6 +32,28 @@ def save_upload(file):
     filepath = os.path.join(UPLOAD_DIR, filename)
     file.save(filepath)
     return f"/assets/uploads/{filename}"
+
+
+def is_deletable_upload(file_path):
+    return bool(file_path) and file_path.replace("\\", "/").startswith("/assets/uploads/")
+
+
+def path_from_url(file_path):
+    rel = file_path.lstrip("/").replace("/", os.sep)
+    return os.path.join(FRONTEND_DIR, rel)
+
+
+def safe_delete_file(file_path):
+    if not is_deletable_upload(file_path):
+        return
+    filepath = path_from_url(file_path)
+    if os.path.isfile(filepath):
+        os.remove(filepath)
+
+
+def cleanup_saved_paths(saved_paths):
+    for path in saved_paths:
+        safe_delete_file(path)
 
 
 def get_db():
@@ -228,16 +250,22 @@ def upload_photo():
     if ext not in ALLOWED_IMAGE:
         return jsonify({"error": "Only image files allowed for photo upload"}), 400
 
-    file_path = save_upload(file)
-    conn = get_db()
-    conn.execute(
-        "INSERT INTO photos (title, description, file_path, category, created_at) VALUES (?, ?, ?, ?, ?)",
-        (title, description, file_path, category, datetime.utcnow().isoformat()),
-    )
-    conn.commit()
-    photo_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
-    conn.close()
-    return jsonify({"success": True, "id": photo_id, "file_path": file_path})
+    saved_paths = []
+    try:
+        file_path = save_upload(file)
+        saved_paths.append(file_path)
+        conn = get_db()
+        conn.execute(
+            "INSERT INTO photos (title, description, file_path, category, created_at) VALUES (?, ?, ?, ?, ?)",
+            (title, description, file_path, category, datetime.utcnow().isoformat()),
+        )
+        conn.commit()
+        photo_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+        conn.close()
+        return jsonify({"success": True, "id": photo_id, "file_path": file_path})
+    except Exception:
+        cleanup_saved_paths(saved_paths)
+        return jsonify({"error": "Failed to save photo. Please try again."}), 500
 
 
 @app.route("/api/upload/video", methods=["POST"])
@@ -249,33 +277,84 @@ def upload_video():
     file = request.files.get("file")
     thumb = request.files.get("thumbnail")
 
+    if not video_url and (not file or not allowed_file(file.filename)):
+        return jsonify({"error": "Upload a video file or provide a YouTube/embed URL"}), 400
+
+    saved_paths = []
     file_path = None
     thumbnail = None
 
-    if file and allowed_file(file.filename):
-        ext = file.filename.rsplit(".", 1)[1].lower()
-        if ext in ALLOWED_VIDEO:
-            file_path = save_upload(file)
-        elif ext in ALLOWED_IMAGE:
-            thumbnail = save_upload(file)
+    try:
+        if file and allowed_file(file.filename):
+            ext = file.filename.rsplit(".", 1)[1].lower()
+            if ext in ALLOWED_VIDEO:
+                file_path = save_upload(file)
+                saved_paths.append(file_path)
+            elif ext in ALLOWED_IMAGE:
+                thumbnail = save_upload(file)
+                saved_paths.append(thumbnail)
 
-    if thumb and allowed_file(thumb.filename):
-        ext = thumb.filename.rsplit(".", 1)[1].lower()
-        if ext in ALLOWED_IMAGE:
-            thumbnail = save_upload(thumb)
+        if thumb and allowed_file(thumb.filename):
+            ext = thumb.filename.rsplit(".", 1)[1].lower()
+            if ext in ALLOWED_IMAGE:
+                if thumbnail:
+                    safe_delete_file(thumbnail)
+                    saved_paths = [p for p in saved_paths if p != thumbnail]
+                thumbnail = save_upload(thumb)
+                saved_paths.append(thumbnail)
 
-    if not file_path and not video_url:
-        return jsonify({"error": "Upload a video file or provide a YouTube/embed URL"}), 400
+        if not file_path and not video_url:
+            cleanup_saved_paths(saved_paths)
+            return jsonify({"error": "Upload a video file or provide a YouTube/embed URL"}), 400
 
+        conn = get_db()
+        conn.execute(
+            "INSERT INTO videos (title, description, file_path, video_url, thumbnail, category, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (title, description, file_path, video_url or None, thumbnail, category, datetime.utcnow().isoformat()),
+        )
+        conn.commit()
+        video_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+        conn.close()
+        return jsonify({"success": True, "id": video_id})
+    except Exception:
+        cleanup_saved_paths(saved_paths)
+        return jsonify({"error": "Failed to save video. Please try again."}), 500
+
+
+@app.route("/api/photos/<int:photo_id>", methods=["DELETE"])
+def delete_photo(photo_id):
     conn = get_db()
-    conn.execute(
-        "INSERT INTO videos (title, description, file_path, video_url, thumbnail, category, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (title, description, file_path, video_url or None, thumbnail, category, datetime.utcnow().isoformat()),
-    )
+    row = conn.execute("SELECT * FROM photos WHERE id = ?", (photo_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"error": "Photo not found"}), 404
+
+    file_path = row["file_path"]
+    conn.execute("DELETE FROM photos WHERE id = ?", (photo_id,))
     conn.commit()
-    video_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
     conn.close()
-    return jsonify({"success": True, "id": video_id})
+
+    safe_delete_file(file_path)
+    return jsonify({"success": True, "message": "Photo deleted"})
+
+
+@app.route("/api/videos/<int:video_id>", methods=["DELETE"])
+def delete_video(video_id):
+    conn = get_db()
+    row = conn.execute("SELECT * FROM videos WHERE id = ?", (video_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"error": "Video not found"}), 404
+
+    file_path = row["file_path"]
+    thumbnail = row["thumbnail"]
+    conn.execute("DELETE FROM videos WHERE id = ?", (video_id,))
+    conn.commit()
+    conn.close()
+
+    safe_delete_file(file_path)
+    safe_delete_file(thumbnail)
+    return jsonify({"success": True, "message": "Video deleted"})
 
 
 @app.route("/api/contact", methods=["POST"])
@@ -336,6 +415,10 @@ def get_contacts():
     return jsonify([dict(r) for r in rows])
 
 
+init_db()
+
+
 if __name__ == "__main__":
-    init_db()
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug, host="0.0.0.0", port=port)

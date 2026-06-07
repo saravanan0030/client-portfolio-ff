@@ -1,4 +1,15 @@
-const API_BASE = window.location.origin;
+const API_BASE = window.APP_CONFIG?.apiBase || window.location.origin;
+const UPLOAD_BASE = window.APP_CONFIG?.uploadBase || window.location.origin;
+
+function mediaUrl(path) {
+  if (!path) return path;
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('//')) return path;
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  if (normalized.startsWith('/assets/uploads/')) {
+    return `${UPLOAD_BASE}${normalized}`;
+  }
+  return path.startsWith('/') ? path : path;
+}
 
 const ICONS = {
   skull: '💀', trophy: '🏆', crosshair: '🎯', star: '⭐', gamepad: '🎮', chart: '📊',
@@ -490,9 +501,10 @@ function renderGallery(filter) {
     : galleryPhotos.filter(p => p.category === filter);
 
   grid.innerHTML = filtered.map((p, i) => `
-    <div class="gallery-item stagger-item" data-category="${p.category}" data-index="${galleryPhotos.indexOf(p)}" style="transition-delay:${i * 60}ms">
-      <img src="${p.file_path}" alt="${p.title}" loading="lazy" />
+    <div class="gallery-item stagger-item" data-category="${p.category}" data-index="${galleryPhotos.indexOf(p)}" data-id="${p.id || ''}" style="transition-delay:${i * 60}ms">
+      <img src="${mediaUrl(p.file_path)}" alt="${p.title}" loading="lazy" />
       <div class="gallery-zoom">🔍</div>
+      ${p.id ? `<button type="button" class="media-delete-btn" data-id="${p.id}" title="Delete photo" aria-label="Delete photo">✕</button>` : ''}
       <div class="gallery-overlay">
         <span class="gallery-cat">${p.category}</span>
         <h4 class="font-orbitron font-bold text-sm">${p.title}</h4>
@@ -503,6 +515,12 @@ function renderGallery(filter) {
 
   grid.querySelectorAll('.gallery-item').forEach(item => {
     item.addEventListener('click', () => openLightbox(parseInt(item.dataset.index)));
+  });
+  grid.querySelectorAll('.media-delete-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      deletePhoto(parseInt(btn.dataset.id));
+    });
   });
   observeStaggerItems(grid.querySelectorAll('.stagger-item'));
 }
@@ -539,7 +557,7 @@ function openLightbox(index) {
   const photo = galleryPhotos[index];
   if (!photo) return;
 
-  document.getElementById('lightboxImg').src = photo.file_path;
+  document.getElementById('lightboxImg').src = mediaUrl(photo.file_path);
   document.getElementById('lightboxImg').alt = photo.title;
   document.getElementById('lightboxTitle').textContent = photo.title;
   document.getElementById('lightboxDesc').textContent = photo.description || '';
@@ -573,6 +591,12 @@ async function loadVideos() {
   grid.querySelectorAll('.video-card').forEach(card => {
     card.addEventListener('click', () => playVideo(parseInt(card.dataset.index)));
   });
+  grid.querySelectorAll('.media-delete-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      deleteVideo(parseInt(btn.dataset.id));
+    });
+  });
   observeStaggerItems(grid.querySelectorAll('.stagger-item'));
 
   if (allVideos.length > 0) playVideo(0);
@@ -590,10 +614,11 @@ function getFallbackVideos() {
 function renderVideoCard(v, i) {
   const thumb = v.thumbnail || 'assets/images/video-thumb-1.svg';
   return `
-    <div class="video-card stagger-item" data-index="${i}" style="transition-delay:${i * 80}ms">
+    <div class="video-card stagger-item" data-index="${i}" data-id="${v.id || ''}" style="transition-delay:${i * 80}ms">
       <div class="video-thumb">
-        <img src="${thumb}" alt="${v.title}" loading="lazy" />
+        <img src="${mediaUrl(thumb)}" alt="${v.title}" loading="lazy" />
         <div class="video-play-btn">▶</div>
+        ${v.id ? `<button type="button" class="media-delete-btn" data-id="${v.id}" title="Delete video" aria-label="Delete video">✕</button>` : ''}
         <span class="video-duration">${v.category || 'video'}</span>
       </div>
       <div class="video-info">
@@ -615,7 +640,7 @@ function playVideo(index) {
   const wrap = document.getElementById('videoPlayerWrap');
 
   if (video.file_path) {
-    wrap.innerHTML = `<video controls autoplay playsinline><source src="${video.file_path}" type="video/mp4">Your browser does not support video.</video>`;
+    wrap.innerHTML = `<video controls autoplay playsinline><source src="${mediaUrl(video.file_path)}" type="video/mp4">Your browser does not support video.</video>`;
   } else if (video.video_url) {
     let url = video.video_url;
     if (url.includes('youtube.com/watch')) {
@@ -631,6 +656,40 @@ function playVideo(index) {
   }
 
   document.getElementById('featuredVideo').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ===== Delete Media ===== */
+async function deletePhoto(id) {
+  if (!confirm('Delete this photo? This cannot be undone.')) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/photos/${id}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (res.ok) {
+      closeLightbox();
+      await loadGallery();
+    } else {
+      alert(result.error || 'Failed to delete photo.');
+    }
+  } catch {
+    alert('Failed to delete photo. Check server connection.');
+  }
+}
+
+async function deleteVideo(id) {
+  if (!confirm('Delete this video? This cannot be undone.')) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/videos/${id}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (res.ok) {
+      await loadVideos();
+    } else {
+      alert(result.error || 'Failed to delete video.');
+    }
+  } catch {
+    alert('Failed to delete video. Check server connection.');
+  }
 }
 
 /* ===== File Drop Zones ===== */

@@ -1347,6 +1347,35 @@ footer::before {
 .upload-success { color: #22c55e; }
 .upload-error { color: #ef4444; }
 
+.media-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.9);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.gallery-item:hover .media-delete-btn,
+.video-card:hover .media-delete-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.media-delete-btn:hover {
+  background: #dc2626;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   * { cursor: auto; }
