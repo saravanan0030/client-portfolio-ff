@@ -486,12 +486,12 @@ async function loadGallery() {
 
 function getFallbackPhotos() {
   return [
-    { title: 'Tournament Victory', description: 'Regional championship finals', file_path: 'assets/images/gallery-1.svg', category: 'tournament' },
-    { title: 'Squad Wipe Clutch', description: '1v4 clutch in ranked', file_path: 'assets/images/gallery-2.svg', category: 'gameplay' },
-    { title: 'AWM Headshot', description: '300m sniper headshot', file_path: 'assets/images/gallery-3.svg', category: 'sniper' },
-    { title: 'Team Phoenix', description: 'Squad photo after win', file_path: 'assets/images/gallery-4.svg', category: 'team' },
-    { title: 'Heroic Rank', description: 'Season 43 achievement', file_path: 'assets/images/gallery-5.svg', category: 'ranked' },
-    { title: 'Streaming Setup', description: 'Live gaming setup', file_path: 'assets/images/gallery-6.svg', category: 'content' },
+    { id: 'fallback-photo-0', title: 'Tournament Victory', description: 'Regional championship finals', file_path: 'assets/images/gallery-1.svg', category: 'tournament' },
+    { id: 'fallback-photo-1', title: 'Squad Wipe Clutch', description: '1v4 clutch in ranked', file_path: 'assets/images/gallery-2.svg', category: 'gameplay' },
+    { id: 'fallback-photo-2', title: 'AWM Headshot', description: '300m sniper headshot', file_path: 'assets/images/gallery-3.svg', category: 'sniper' },
+    { id: 'fallback-photo-3', title: 'Team Phoenix', description: 'Squad photo after win', file_path: 'assets/images/gallery-4.svg', category: 'team' },
+    { id: 'fallback-photo-4', title: 'Heroic Rank', description: 'Season 43 achievement', file_path: 'assets/images/gallery-5.svg', category: 'ranked' },
+    { id: 'fallback-photo-5', title: 'Streaming Setup', description: 'Live gaming setup', file_path: 'assets/images/gallery-6.svg', category: 'content' },
   ];
 }
 
@@ -505,7 +505,7 @@ function renderGallery(filter) {
     <div class="gallery-item stagger-item" data-category="${p.category}" data-index="${galleryPhotos.indexOf(p)}" style="transition-delay:${i * 60}ms">
       <img src="${mediaUrl(p.file_path)}" alt="${p.title}" loading="lazy" />
       <div class="gallery-zoom">🔍</div>
-      ${p.id ? `<button type="button" class="media-delete-btn" data-id="${p.id}" title="Delete photo" aria-label="Delete photo">✕</button>` : ''}
+      <button type="button" class="media-delete-btn" data-id="${p.id}" title="Delete photo" aria-label="Delete photo">✕</button>
       <div class="gallery-overlay">
         <span class="gallery-cat">${p.category}</span>
         <h4 class="font-orbitron font-bold text-sm">${p.title}</h4>
@@ -520,7 +520,7 @@ function renderGallery(filter) {
   grid.querySelectorAll('.media-delete-btn').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      deletePhoto(parseInt(btn.dataset.id));
+      deletePhoto(btn.dataset.id);
     });
   });
   observeStaggerItems(grid.querySelectorAll('.stagger-item'));
@@ -580,7 +580,6 @@ function navigateLightbox(dir) {
 let allVideos = [];
 
 async function loadVideos() {
-  const grid = document.getElementById('videosGrid');
   try {
     const res = await fetch(`${API_BASE}/api/videos`);
     allVideos = await res.json();
@@ -588,27 +587,17 @@ async function loadVideos() {
     allVideos = getFallbackVideos();
   }
 
-  grid.innerHTML = allVideos.map((v, i) => renderVideoCard(v, i)).join('');
-  grid.querySelectorAll('.video-card').forEach(card => {
-    card.addEventListener('click', () => playVideo(parseInt(card.dataset.index)));
-  });
-  grid.querySelectorAll('.media-delete-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      deleteVideo(parseInt(btn.dataset.id));
-    });
-  });
-  observeStaggerItems(grid.querySelectorAll('.stagger-item'));
+  renderVideoGrid();
 
   if (allVideos.length > 0) playVideo(0);
 }
 
 function getFallbackVideos() {
   return [
-    { title: 'Booyah Highlights', description: 'Best Booyah moments', video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', thumbnail: 'assets/images/video-thumb-1.svg', category: 'highlight' },
-    { title: 'AWM Montage', description: 'Sniper montage', video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', thumbnail: 'assets/images/video-thumb-2.svg', category: 'montage' },
-    { title: 'Tournament Finals', description: 'Final match replay', video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', thumbnail: 'assets/images/video-thumb-3.svg', category: 'tournament' },
-    { title: 'Clutch King', description: '1v4 clutch plays', video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', thumbnail: 'assets/images/video-thumb-4.svg', category: 'clutch' },
+    { id: 'fallback-video-0', title: 'Booyah Highlights', description: 'Best Booyah moments', video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', thumbnail: 'assets/images/video-thumb-1.svg', category: 'highlight' },
+    { id: 'fallback-video-1', title: 'AWM Montage', description: 'Sniper montage', video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', thumbnail: 'assets/images/video-thumb-2.svg', category: 'montage' },
+    { id: 'fallback-video-2', title: 'Tournament Finals', description: 'Final match replay', video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', thumbnail: 'assets/images/video-thumb-3.svg', category: 'tournament' },
+    { id: 'fallback-video-3', title: 'Clutch King', description: '1v4 clutch plays', video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', thumbnail: 'assets/images/video-thumb-4.svg', category: 'clutch' },
   ];
 }
 
@@ -627,6 +616,21 @@ function renderVideoCard(v, i) {
         <p>${v.description || ''}</p>
       </div>
     </div>`;
+}
+
+function renderVideoGrid() {
+  const grid = document.getElementById('videosGrid');
+  grid.innerHTML = allVideos.map((v, i) => renderVideoCard(v, i)).join('');
+  grid.querySelectorAll('.video-card').forEach(card => {
+    card.addEventListener('click', () => playVideo(parseInt(card.dataset.index)));
+  });
+  grid.querySelectorAll('.media-delete-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      deleteVideo(btn.dataset.id);
+    });
+  });
+  observeStaggerItems(grid.querySelectorAll('.stagger-item'));
 }
 
 function playVideo(index) {
@@ -669,6 +673,13 @@ async function deletePhoto(id) {
   }
   if (!confirm('Delete this photo? This cannot be undone.')) return;
 
+  if (typeof id === 'string' && id.startsWith('fallback-photo-')) {
+    galleryPhotos = galleryPhotos.filter(photo => photo.id !== id);
+    renderGallery('all');
+    closeLightbox();
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/photos/${id}`, { method: 'DELETE' });
     const result = await res.json();
@@ -691,6 +702,12 @@ async function deleteVideo(id) {
     return;
   }
   if (!confirm('Delete this video? This cannot be undone.')) return;
+
+  if (typeof id === 'string' && id.startsWith('fallback-video-')) {
+    allVideos = allVideos.filter(video => video.id !== id);
+    renderVideoGrid();
+    return;
+  }
 
   try {
     const res = await fetch(`${API_BASE}/api/videos/${id}`, { method: 'DELETE' });
